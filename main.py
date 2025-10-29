@@ -106,8 +106,8 @@ async def animate_spaceship(
         await asyncio.sleep(0)
         row_dir, col_dir, _ = read_controls(canvas)
         draw_frame(canvas, row, col, frame, negative=True)
-        row += row_dir * 4
-        col += col_dir * 4
+        row += row_dir
+        col += col_dir
         max_row, max_col = canvas.getmaxyx()
         frame_rows, frame_cols = get_frame_size(frame)
         row = max(0, min(row, max_row - frame_rows))
