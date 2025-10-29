@@ -25,6 +25,15 @@ UP_KEY_CODE = 259
 DOWN_KEY_CODE = 258
 
 
+def get_frame_size(text):
+    """Calculate size of multiline text fragment, return pair — number of rows and colums."""
+
+    lines = text.splitlines()
+    rows = len(lines)
+    columns = max([len(line) for line in lines])
+    return rows, columns
+
+
 def read_controls(canvas):
     """Read keys pressed and returns tuple with controls state."""
 
@@ -87,7 +96,9 @@ def draw_frame(canvas, start_row, start_column, text, negative=False):
             canvas.addch(row, column, symbol)
 
 
-async def animate_spaceship(canvas: curses.window, start_row: int, start_col: int, frames: list):
+async def animate_spaceship(
+    canvas: curses.window, start_row: int, start_col: int, frames: list
+):
     col = start_col
     row = start_row
     for frame in cycle(frames):
@@ -95,8 +106,12 @@ async def animate_spaceship(canvas: curses.window, start_row: int, start_col: in
         await asyncio.sleep(0)
         row_dir, col_dir, _ = read_controls(canvas)
         draw_frame(canvas, row, col, frame, negative=True)
-        row += row_dir
-        col += col_dir
+        row += row_dir * 4
+        col += col_dir * 4
+        max_row, max_col = canvas.getmaxyx()
+        frame_rows, frame_cols = get_frame_size(frame)
+        row = max(0, min(row, max_row - frame_rows))
+        col = max(0, min(col, max_col - frame_cols))
 
 
 async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0):
