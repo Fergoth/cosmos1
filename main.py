@@ -1,4 +1,5 @@
 from collections import namedtuple
+from itertools import cycle
 from random import randint, choice
 import time
 import curses
@@ -15,6 +16,43 @@ TICK_TEMPLATE = [
     Star_tick(curses.A_BOLD, 0.5),
     Star_tick(curses.A_NORMAL, 0.3),
 ]
+SPACE_SHIP_TICK_RATE = 0.2
+
+SPACE_KEY_CODE = 32
+LEFT_KEY_CODE = 260
+RIGHT_KEY_CODE = 261
+UP_KEY_CODE = 259
+DOWN_KEY_CODE = 258
+
+
+def read_controls(canvas):
+    """Read keys pressed and returns tuple with controls state."""
+
+    rows_direction = columns_direction = 0
+    space_pressed = False
+
+    while True:
+        pressed_key_code = canvas.getch()
+
+        if pressed_key_code == -1:
+            # https://docs.python.org/3/library/curses.html#curses.window.getch
+            break
+
+        if pressed_key_code == UP_KEY_CODE:
+            rows_direction = -1
+
+        if pressed_key_code == DOWN_KEY_CODE:
+            rows_direction = 1
+
+        if pressed_key_code == RIGHT_KEY_CODE:
+            columns_direction = 1
+
+        if pressed_key_code == LEFT_KEY_CODE:
+            columns_direction = -1
+
+        if pressed_key_code == SPACE_KEY_CODE:
+            space_pressed = True
+    return rows_direction, columns_direction, space_pressed
 
 
 def draw_frame(canvas, start_row, start_column, text, negative=False):
@@ -49,12 +87,16 @@ def draw_frame(canvas, start_row, start_column, text, negative=False):
             canvas.addch(row, column, symbol)
 
 
-async def animate_spaceship(canvas: curses.window, row: int, column: int, frames: list):
-    while True:
-        for frame in frames:
-            draw_frame(canvas, row, column, frame)
-            await asyncio.sleep(0)
-            draw_frame(canvas, row, column, frame, negative=True)
+async def animate_spaceship(canvas: curses.window, start_row: int, start_col: int, frames: list):
+    col = start_col
+    row = start_row
+    for frame in cycle(frames):
+        draw_frame(canvas, row, col, frame)
+        await asyncio.sleep(0)
+        row_dir, col_dir, _ = read_controls(canvas)
+        draw_frame(canvas, row, col, frame, negative=True)
+        row += row_dir
+        col += col_dir
 
 
 async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0):
@@ -117,6 +159,7 @@ def load_ship_frames():
 
 
 def draw(canvas: curses.window):
+    canvas.nodelay(True)
     ship_frames = load_ship_frames()
     curses.curs_set(0)
     coroutines = []
