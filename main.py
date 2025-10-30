@@ -95,13 +95,20 @@ def draw_frame(canvas, start_row, start_column, text, negative=False):
             symbol = symbol if not negative else " "
             canvas.addch(row, column, symbol)
 
+def duplicate_frames(n : int, frames : list):
+    n_frames = []
+    for frame in frames:
+        for _ in range(n):
+            n_frames.append(frame)
+    return n_frames
 
 async def animate_spaceship(
     canvas: curses.window, start_row: int, start_col: int, frames: list
 ):
     col = start_col
-    row = start_row
-    for frame in cycle(frames):
+    row = start_row 
+    frame_rate = int(SPACE_SHIP_TICK_RATE/TICK_TIMEOUT)
+    for frame in cycle(duplicate_frames(frame_rate, frames)):
         draw_frame(canvas, row, col, frame)
         await asyncio.sleep(0)
         row_dir, col_dir, _ = read_controls(canvas)
