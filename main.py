@@ -5,16 +5,16 @@ import time
 import curses
 import asyncio
 
-Star_tick = namedtuple("Star_tick", ["attribute", "time"])
+star_tick = namedtuple("star_tick", ["attribute", "time"])
 
 STARS_COUNT = 100
 STARS = ["*", ":", "+", ";", "."]
 TICK_TIMEOUT = 0.1
 TICK_TEMPLATE = [
-    Star_tick(curses.A_DIM, 2),
-    Star_tick(curses.A_NORMAL, 0.3),
-    Star_tick(curses.A_BOLD, 0.5),
-    Star_tick(curses.A_NORMAL, 0.3),
+    star_tick(curses.A_DIM, 2),
+    star_tick(curses.A_NORMAL, 0.3),
+    star_tick(curses.A_BOLD, 0.5),
+    star_tick(curses.A_NORMAL, 0.3),
 ]
 SPACE_SHIP_TICK_RATE = 0.2
 
