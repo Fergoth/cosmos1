@@ -190,7 +190,7 @@ def draw(canvas: curses.window):
                 coroutine.send(None)
             except StopIteration:
                 coroutines.remove(coroutine)
-            canvas.refresh()
+        canvas.refresh()
         time.sleep(TICK_TIMEOUT)
 
 
