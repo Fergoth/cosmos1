@@ -1,183 +1,11 @@
-from collections import namedtuple
-from itertools import cycle
-from random import randint, choice
 import time
 import curses
-import asyncio
+from stars.stars import add_stars
+from spaceship.spaceship import load_ship_frames, animate_spaceship
+from spaceship.fire import fire
 
-star_tick = namedtuple("star_tick", ["attribute", "time"])
 
-STARS_COUNT = 100
-STARS = ["*", ":", "+", ";", "."]
 TICK_TIMEOUT = 0.1
-TICK_TEMPLATE = [
-    star_tick(curses.A_DIM, 2),
-    star_tick(curses.A_NORMAL, 0.3),
-    star_tick(curses.A_BOLD, 0.5),
-    star_tick(curses.A_NORMAL, 0.3),
-]
-SPACE_SHIP_TICK_RATE = 0.2
-
-SPACE_KEY_CODE = 32
-LEFT_KEY_CODE = 260
-RIGHT_KEY_CODE = 261
-UP_KEY_CODE = 259
-DOWN_KEY_CODE = 258
-
-
-def get_frame_size(text):
-    """Calculate size of multiline text fragment, return pair — number of rows and colums."""
-
-    lines = text.splitlines()
-    rows = len(lines)
-    columns = max([len(line) for line in lines])
-    return rows, columns
-
-
-def read_controls(canvas):
-    """Read keys pressed and returns tuple with controls state."""
-
-    rows_direction = columns_direction = 0
-    space_pressed = False
-
-    while True:
-        pressed_key_code = canvas.getch()
-
-        if pressed_key_code == -1:
-            # https://docs.python.org/3/library/curses.html#curses.window.getch
-            break
-
-        if pressed_key_code == UP_KEY_CODE:
-            rows_direction = -1
-
-        if pressed_key_code == DOWN_KEY_CODE:
-            rows_direction = 1
-
-        if pressed_key_code == RIGHT_KEY_CODE:
-            columns_direction = 1
-
-        if pressed_key_code == LEFT_KEY_CODE:
-            columns_direction = -1
-
-        if pressed_key_code == SPACE_KEY_CODE:
-            space_pressed = True
-    return rows_direction, columns_direction, space_pressed
-
-
-def draw_frame(canvas, start_row, start_column, text, negative=False):
-    """Draw multiline text fragment on canvas, erase text instead of drawing if negative=True is specified."""
-
-    rows_number, columns_number = canvas.getmaxyx()
-
-    for row, line in enumerate(text.splitlines(), round(start_row)):
-        if row < 0:
-            continue
-
-        if row >= rows_number:
-            break
-
-        for column, symbol in enumerate(line, round(start_column)):
-            if column < 0:
-                continue
-
-            if column >= columns_number:
-                break
-
-            if symbol == " ":
-                continue
-
-            # Check that current position it is not in a lower right corner of the window
-            # Curses will raise exception in that case. Don`t ask why…
-            # https://docs.python.org/3/library/curses.html#curses.window.addch
-            if row == rows_number - 1 and column == columns_number - 1:
-                continue
-
-            symbol = symbol if not negative else " "
-            canvas.addch(row, column, symbol)
-
-def duplicate_frames(n : int, frames : list):
-    n_frames = []
-    for frame in frames:
-        for _ in range(n):
-            n_frames.append(frame)
-    return n_frames
-
-async def animate_spaceship(
-    canvas: curses.window, start_row: int, start_col: int, frames: list
-):
-    col = start_col
-    row = start_row 
-    frame_rate = int(SPACE_SHIP_TICK_RATE/TICK_TIMEOUT)
-    for frame in cycle(duplicate_frames(frame_rate, frames)):
-        draw_frame(canvas, row, col, frame)
-        await asyncio.sleep(0)
-        row_dir, col_dir, _ = read_controls(canvas)
-        draw_frame(canvas, row, col, frame, negative=True)
-        row += row_dir
-        col += col_dir
-        max_row, max_col = canvas.getmaxyx()
-        frame_rows, frame_cols = get_frame_size(frame)
-        row = max(0, min(row, max_row - frame_rows))
-        col = max(0, min(col, max_col - frame_cols))
-
-
-async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0):
-    """Display animation of gun shot, direction and speed can be specified."""
-
-    row, column = start_row, start_column
-
-    canvas.addstr(round(row), round(column), "*")
-    await asyncio.sleep(0)
-
-    canvas.addstr(round(row), round(column), "O")
-    await asyncio.sleep(0)
-    canvas.addstr(round(row), round(column), " ")
-
-    row += rows_speed
-    column += columns_speed
-
-    symbol = "-" if columns_speed else "|"
-
-    rows, columns = canvas.getmaxyx()
-    max_row, max_column = rows - 1, columns - 1
-
-    curses.beep()
-
-    while 0 < row < max_row and 0 < column < max_column:
-        canvas.addstr(round(row), round(column), symbol)
-        await asyncio.sleep(0)
-        canvas.addstr(round(row), round(column), " ")
-        row += rows_speed
-        column += columns_speed
-
-
-async def blink(
-    canvas: curses.window,
-    row: int,
-    column: int,
-    symbol: str = "*",
-    start_pause: int = 0,
-):
-    for _ in range(start_pause):
-        await asyncio.sleep(0)
-    while True:
-        for tick in TICK_TEMPLATE:
-            canvas.addch(row, column, symbol, tick.attribute)
-            for _ in range(int(tick.time / TICK_TIMEOUT)):
-                await asyncio.sleep(0)
-
-
-def get_random_coords(canvas: curses.window):
-    max_row, max_col = canvas.getmaxyx()
-    return (randint(0, max_row - 1), randint(0, max_col - 1))
-
-
-def load_ship_frames():
-    frames = []
-    for i in range(1, 3):
-        with open(f"animations/ship{i}.txt", "r") as f:
-            frames.append(f.read())
-    return frames
 
 
 def draw(canvas: curses.window):
@@ -185,18 +13,16 @@ def draw(canvas: curses.window):
     ship_frames = load_ship_frames()
     curses.curs_set(0)
     coroutines = []
-    for _ in range(STARS_COUNT):
-        row, column = get_random_coords(canvas)
-        start_pause = randint(1, 20)
-        coroutines.append(blink(canvas, row, column, choice(STARS), start_pause))
+    coroutines = add_stars(canvas, coroutines, TICK_TIMEOUT)
     coroutines.append(fire(canvas, 10, 10))
-    coroutines.append(animate_spaceship(canvas, 10, 10, ship_frames))
+    coroutines.append(animate_spaceship(canvas, 10, 10, ship_frames, TICK_TIMEOUT))
     while True:
         for coroutine in coroutines.copy():
             try:
                 coroutine.send(None)
             except StopIteration:
                 coroutines.remove(coroutine)
+        canvas.refresh()
         canvas.refresh()
         time.sleep(TICK_TIMEOUT)
 
