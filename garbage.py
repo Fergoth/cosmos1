@@ -1,5 +1,6 @@
 from utilities import draw_frame
 import asyncio
+from random import randint
 
 
 def load_garbage_frames():
@@ -10,6 +11,16 @@ def load_garbage_frames():
         with open(f"animations/{filename}.txt", "r") as f:
             frames.append(f.read())
     return frames
+
+
+async def fill_orbit_with_garbage(coroutines, frame, canvas):
+    """Fill orbit with garbage."""
+    while True:
+        coroutines.append(
+            fly_garbage(canvas, column=randint(0, 100), garbage_frame=frame)
+        )
+        for i in range(3):
+            await asyncio.sleep(0)
 
 
 async def fly_garbage(canvas, column, garbage_frame, speed=0.5):
