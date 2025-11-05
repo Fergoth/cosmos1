@@ -26,7 +26,7 @@ async def fill_orbit_with_garbage(coroutines, frame, canvas):
         new_obstacle = Obstacle(0, column, rows_size=row_size, columns_size=column_size)
         coroutines.append(fly_garbage(canvas, column, frame, new_obstacle))
         OBSTACLES.append(new_obstacle)
-        await sleep(randint(3, 5))
+        await sleep(randint(5, 7))
 
 
 async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):
