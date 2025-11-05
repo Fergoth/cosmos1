@@ -5,6 +5,7 @@ from typing import List
 from obstacles import Obstacle
 from utilities import draw_frame, get_frame_size, sleep
 from explode import explode
+from game_scenario import game_state
 
 OBSTACLES: List[Obstacle] = []
 OBSTACLES_IN_LAST_COLLISION: List[Obstacle] = []
@@ -23,12 +24,17 @@ def load_garbage_frames():
 async def fill_orbit_with_garbage(coroutines, frame, canvas):
     """Fill orbit with garbage."""
     while True:
+        delay = game_state.get_garbage_delay_tics()
+        if delay is None:
+            await sleep(1)
+            continue
         row_size, column_size = get_frame_size(frame)
-        column = randint(0, 100)
+        rows_number, columns_number = canvas.getmaxyx()
+        column = randint(0, columns_number - 1)
         new_obstacle = Obstacle(0, column, rows_size=row_size, columns_size=column_size)
         coroutines.append(fly_garbage(canvas, column, frame, new_obstacle))
         OBSTACLES.append(new_obstacle)
-        await sleep(randint(5, 7))
+        await sleep(delay)
 
 
 async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):

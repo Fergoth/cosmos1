@@ -5,6 +5,7 @@ from itertools import cycle
 from garbage import OBSTACLES, OBSTACLES_IN_LAST_COLLISION
 from physics import update_speed
 from utilities import draw_frame, duplicate_frames, get_frame_size, read_controls
+from game_scenario import game_state
 
 SPACE_SHIP_TICK_RATE = 0.1
 
@@ -75,7 +76,7 @@ async def animate_spaceship(
         draw_frame(canvas, row, col, frame)
         await asyncio.sleep(0)
         row_dir, col_dir, space_pressed = read_controls(canvas)
-        if space_pressed:
+        if space_pressed and game_state.can_fire:
             coroutines.append(fire(canvas, row, col + 2))
         draw_frame(canvas, row, col, frame, negative=True)
         row_speed, col_speed = update_speed(row_speed, col_speed, row_dir, col_dir)

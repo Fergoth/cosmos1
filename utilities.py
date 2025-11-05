@@ -24,7 +24,7 @@ def duplicate_frames(n: int, frames: list):
 
 def get_random_coords(canvas: curses.window):
     max_row, max_col = canvas.getmaxyx()
-    return (randint(0, max_row - 1), randint(0, max_col - 1))
+    return (randint(1, max_row - 2), randint(1, max_col - 2))
 
 
 def get_frame_size(text):
