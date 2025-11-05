@@ -4,7 +4,6 @@ from stars import add_stars
 from spaceship.spaceship import load_ship_frames, animate_spaceship
 from spaceship.fire import fire
 from garbage import load_garbage_frames, fill_orbit_with_garbage
-from random import choice
 
 TICK_TIMEOUT = 0.1
 

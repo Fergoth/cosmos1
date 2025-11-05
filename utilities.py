@@ -1,11 +1,17 @@
 import curses
 from random import randint
+import asyncio
 
 SPACE_KEY_CODE = 32
 LEFT_KEY_CODE = 260
 RIGHT_KEY_CODE = 261
 UP_KEY_CODE = 259
 DOWN_KEY_CODE = 258
+
+
+async def sleep(ticks=1):
+    for i in range(ticks):
+        await asyncio.sleep(0)
 
 
 def duplicate_frames(n: int, frames: list):

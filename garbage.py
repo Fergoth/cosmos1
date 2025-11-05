@@ -1,6 +1,7 @@
 from utilities import draw_frame
 import asyncio
 from random import randint
+from utilities import sleep
 
 
 def load_garbage_frames():
@@ -19,8 +20,7 @@ async def fill_orbit_with_garbage(coroutines, frame, canvas):
         coroutines.append(
             fly_garbage(canvas, column=randint(0, 100), garbage_frame=frame)
         )
-        for i in range(3):
-            await asyncio.sleep(0)
+        await sleep(3)
 
 
 async def fly_garbage(canvas, column, garbage_frame, speed=0.5):

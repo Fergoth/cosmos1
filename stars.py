@@ -1,7 +1,6 @@
 from collections import namedtuple
 import curses
-import asyncio
-from utilities import get_random_coords
+from utilities import get_random_coords, sleep
 from random import randint, choice
 
 star_tick = namedtuple("Star_tick", ["attribute", "time"])
@@ -25,13 +24,11 @@ async def blink(
     symbol: str = "*",
     start_pause: int = 0,
 ):
-    for _ in range(start_pause):
-        await asyncio.sleep(0)
+    await sleep(start_pause)
     while True:
         for tick in TICK_TEMPLATE:
             canvas.addch(row, column, symbol, tick.attribute)
-            for _ in range(int(tick.time / tick_timeout)):
-                await asyncio.sleep(0)
+            await sleep(int(tick.time / tick_timeout))
 
 
 def add_stars(canvas: curses.window, coroutines: list, tick_timeout: float):
