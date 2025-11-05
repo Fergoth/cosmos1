@@ -28,7 +28,6 @@ def draw(canvas: curses.window):
             except StopIteration:
                 coroutines.remove(coroutine)
         canvas.refresh()
-        canvas.refresh()
         time.sleep(TICK_TIMEOUT)
 
 
