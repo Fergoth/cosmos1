@@ -4,6 +4,7 @@ from typing import List
 
 from obstacles import Obstacle
 from utilities import draw_frame, get_frame_size, sleep
+from explode import explode
 
 OBSTACLES: List[Obstacle] = []
 OBSTACLES_IN_LAST_COLLISION: List[Obstacle] = []
@@ -48,5 +49,6 @@ async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):
         if obstacle in OBSTACLES_IN_LAST_COLLISION:
             OBSTACLES_IN_LAST_COLLISION.remove(obstacle)
             OBSTACLES.remove(obstacle)
+            await explode(canvas, row, column)
             return
     OBSTACLES.remove(obstacle)

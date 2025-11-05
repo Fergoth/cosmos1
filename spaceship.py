@@ -1,9 +1,10 @@
 import asyncio
 import curses
 from itertools import cycle
-from utilities import draw_frame, read_controls, get_frame_size, duplicate_frames
-from physics import update_speed
+
 from garbage import OBSTACLES, OBSTACLES_IN_LAST_COLLISION
+from physics import update_speed
+from utilities import draw_frame, duplicate_frames, get_frame_size, read_controls
 
 SPACE_SHIP_TICK_RATE = 0.1
 
@@ -42,6 +43,14 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
                 return
 
 
+async def show_game_over(canvas: curses.window):
+    with open("animations/game_over.txt", "r") as f:
+        game_over_text = f.read()
+    while True:
+        await asyncio.sleep(0)
+        draw_frame(canvas, 10, 30, game_over_text)
+
+
 def load_ship_frames():
     frames = []
     for i in range(1, 3):
@@ -67,7 +76,7 @@ async def animate_spaceship(
         await asyncio.sleep(0)
         row_dir, col_dir, space_pressed = read_controls(canvas)
         if space_pressed:
-            coroutines.append(fire(canvas, row, col+2))
+            coroutines.append(fire(canvas, row, col + 2))
         draw_frame(canvas, row, col, frame, negative=True)
         row_speed, col_speed = update_speed(row_speed, col_speed, row_dir, col_dir)
         row += row_speed
@@ -76,3 +85,7 @@ async def animate_spaceship(
         frame_rows, frame_cols = get_frame_size(frame)
         row = max(0, min(row, max_row - frame_rows))
         col = max(0, min(col, max_col - frame_cols))
+        for obstacle in OBSTACLES:
+            if obstacle.has_collision(row, col, frame_rows, frame_cols):
+                coroutines.append(show_game_over(canvas))
+                return
