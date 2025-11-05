@@ -1,7 +1,11 @@
-from utilities import draw_frame
 import asyncio
 from random import randint
-from utilities import sleep
+from typing import List
+
+from obstacles import Obstacle
+from utilities import draw_frame, get_frame_size, sleep
+
+OBSTACLES: List[Obstacle] = []
 
 
 def load_garbage_frames():
@@ -17,13 +21,15 @@ def load_garbage_frames():
 async def fill_orbit_with_garbage(coroutines, frame, canvas):
     """Fill orbit with garbage."""
     while True:
-        coroutines.append(
-            fly_garbage(canvas, column=randint(0, 100), garbage_frame=frame)
-        )
-        await sleep(3)
+        row_size, column_size = get_frame_size(frame)
+        column = randint(0, 100)
+        new_obstacle = Obstacle(0, column, rows_size=row_size, columns_size=column_size)
+        coroutines.append(fly_garbage(canvas, column, frame, new_obstacle))
+        OBSTACLES.append(new_obstacle)
+        await sleep(randint(3, 5))
 
 
-async def fly_garbage(canvas, column, garbage_frame, speed=0.5):
+async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):
     """Animate garbage, flying from top to bottom. Сolumn position will stay same, as specified on start."""
     rows_number, columns_number = canvas.getmaxyx()
 
@@ -37,3 +43,5 @@ async def fly_garbage(canvas, column, garbage_frame, speed=0.5):
         await asyncio.sleep(0)
         draw_frame(canvas, row, column, garbage_frame, negative=True)
         row += speed
+        obstacle.row = row
+    OBSTACLES.remove(obstacle)
