@@ -1,5 +1,5 @@
 import asyncio
-from random import randint
+from random import randint, choice
 from typing import List
 
 from obstacles import Obstacle
@@ -21,9 +21,10 @@ def load_garbage_frames():
     return frames
 
 
-async def fill_orbit_with_garbage(coroutines, frame, canvas):
+async def fill_orbit_with_garbage(coroutines, frames, canvas):
     """Fill orbit with garbage."""
     while True:
+        frame = choice(frames)
         delay = game_state.get_garbage_delay_tics()
         if delay is None:
             await sleep(1)

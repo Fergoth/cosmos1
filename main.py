@@ -37,7 +37,7 @@ def draw(canvas: curses.window):
     coroutines.append(
         animate_spaceship(canvas, 10, 10, ship_frames, TICK_TIMEOUT, coroutines)
     )
-    coroutines.append(fill_orbit_with_garbage(coroutines, garbage_frames[0], canvas))
+    coroutines.append(fill_orbit_with_garbage(coroutines, garbage_frames, canvas))
     coroutines.append(draw_year(canvas))
     # uncomment below to show obstacles
     # coroutines.append(obstacles.show_obstacles(canvas, OBSTACLES))
