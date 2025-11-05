@@ -3,7 +3,7 @@ import curses
 from itertools import cycle
 from utilities import draw_frame, read_controls, get_frame_size, duplicate_frames
 from physics import update_speed
-from garbage import OBSTACLES
+from garbage import OBSTACLES, OBSTACLES_IN_LAST_COLLISION
 
 SPACE_SHIP_TICK_RATE = 0.1
 
@@ -38,6 +38,7 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
         column += columns_speed
         for obstacle in OBSTACLES:
             if obstacle.has_collision(row, column):
+                OBSTACLES_IN_LAST_COLLISION.append(obstacle)
                 return
 
 

@@ -6,6 +6,7 @@ from obstacles import Obstacle
 from utilities import draw_frame, get_frame_size, sleep
 
 OBSTACLES: List[Obstacle] = []
+OBSTACLES_IN_LAST_COLLISION: List[Obstacle] = []
 
 
 def load_garbage_frames():
@@ -44,4 +45,8 @@ async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):
         draw_frame(canvas, row, column, garbage_frame, negative=True)
         row += speed
         obstacle.row = row
+        if obstacle in OBSTACLES_IN_LAST_COLLISION:
+            OBSTACLES_IN_LAST_COLLISION.remove(obstacle)
+            OBSTACLES.remove(obstacle)
+            return
     OBSTACLES.remove(obstacle)
