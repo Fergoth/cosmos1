@@ -29,16 +29,16 @@ async def fill_orbit_with_garbage(coroutines, frames, canvas):
         if delay is None:
             await sleep(1)
             continue
-        row_size, column_size = get_frame_size(frame)
-        rows_number, columns_number = canvas.getmaxyx()
+        
+        _, columns_number = canvas.getmaxyx()
         column = randint(0, columns_number - 1)
-        new_obstacle = Obstacle(0, column, rows_size=row_size, columns_size=column_size)
-        coroutines.append(fly_garbage(canvas, column, frame, new_obstacle))
-        OBSTACLES.append(new_obstacle)
+
+        coroutines.append(fly_garbage(canvas, column, frame))
+       
         await sleep(delay)
 
 
-async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):
+async def fly_garbage(canvas, column, garbage_frame, speed=0.5):
     """Animate garbage, flying from top to bottom. Сolumn position will stay same, as specified on start."""
     rows_number, columns_number = canvas.getmaxyx()
 
@@ -47,6 +47,9 @@ async def fly_garbage(canvas, column, garbage_frame, obstacle, speed=0.5):
 
     row = 0
 
+    row_size, column_size = get_frame_size(garbage_frame)
+    obstacle = Obstacle(0, column, rows_size=row_size, columns_size=column_size)
+    OBSTACLES.append(obstacle)
     while row < rows_number:
         draw_frame(canvas, row, column, garbage_frame)
         await asyncio.sleep(0)
